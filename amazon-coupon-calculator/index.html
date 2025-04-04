@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>亚马逊优惠促销费用测算</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .calculator-container {
+            display: flex;
+            gap: 20px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-section {
+            flex: 1;
+            padding: 20px;
+        }
+        .result-section {
+            flex: 1;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #1a73e8;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #1557b0;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .result-item .label {
+            color: #666;
+        }
+        .result-item .value {
+            font-weight: bold;
+        }
+        .formula-result {
+            color: #666;
+            margin: 5px 0;
+            padding-left: 20px;
+            font-size: 0.9em;
+        }
+        .comparison {
+            color: #d93025;
+            font-weight: bold;
+        }
+        h2 {
+            margin-top: 0;
+            color: #202124;
+            font-size: 20px;
+        }
+        .summary {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f0fe;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #1a73e8;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="input-section">
+            <h2>选择输入区</h2>
+            <div class="form-group">
+                <label for="dealType">促销类型</label>
+                <select id="dealType">
+                    <option value="zdeal">Z划算</option>
+                    <option value="coupon">优惠券</option>
+                    <option value="ld">LD</option>
+                    <option value="bd">BD</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="days">促销时长 (天)</label>
+                <input type="number" id="days" value="1" min="1">
+            </div>
+            <div class="form-group">
+                <label for="quantity">订单量</label>
+                <input type="number" id="quantity" required>
+            </div>
+            <div class="form-group">
+                <label for="price">售价 ($)</label>
+                <input type="number" id="price" step="0.01" required>
+            </div>
+            <button onclick="calculate()">计算</button>
+        </div>
+
+        <div class="result-section">
+            <h2>结果</h2>
+            <div class="result">
+                <div class="result-item">
+                    <span class="label">旧政策-总费用</span>
+                    <span class="value" id="oldFee">-</span>
+                </div>
+                <div class="formula-result" id="oldFormula"></div>
+                <div class="result-item">
+                    <span class="label">旧政策-每单费用</span>
+                    <span class="value" id="oldUnitFee">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">新政策-总费用</span>
+                    <span class="value" id="newFee">-</span>
+                </div>
+                <div class="formula-result" id="newFormula"></div>
+                <div class="result-item">
+                    <span class="label">新政策-每单费用</span>
+                    <span class="value" id="newUnitFee">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">费用比较</span>
+                    <span class="value comparison" id="comparison"></span>
+                </div>
+            </div>
+            <div class="summary" id="summary"></div>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            const dealType = document.getElementById('dealType').value;
+            const days = parseInt(document.getElementById('days').value);
+            const quantity = parseInt(document.getElementById('quantity').value);
+            const price = parseFloat(document.getElementById('price').value);
+
+            if (isNaN(quantity) || isNaN(price) || isNaN(days)) {
+                alert('请输入有效的数字');
+                return;
+            }
+
+            let oldFee, newFee, oldFormula, newFormula;
+
+            switch(dealType) {
+                case 'zdeal':
+                    // Z划算计算逻辑
+                    oldFee = 300;
+                    oldFormula = '$300 (固定费用)';
+                    
+                    const baseCost = 70 * days;
+                    const percentageCost = Math.min(price * quantity * 0.01, 2000);
+                    newFee = Math.min(2000, baseCost + percentageCost);
+                    newFormula = `$70 × ${days} + min(${(price * quantity).toFixed(2)} × 1%, $2,000) = $${baseCost.toFixed(2)} + $${percentageCost.toFixed(2)}`;
+                    break;
+
+                case 'coupon':
+                    // 优惠券计算逻辑
+                    oldFee = quantity * 0.6;
+                    oldFormula = `${quantity} × $0.6`;
+                    
+                    const couponBaseCost = 5;
+                    const couponPercentageCost = price * quantity * 0.025;
+                    newFee = couponBaseCost + couponPercentageCost;
+                    newFormula = `$5 + (${price.toFixed(2)} × ${quantity} × 2.5%) = $${couponBaseCost.toFixed(2)} + $${couponPercentageCost.toFixed(2)}`;
+                    break;
+
+                case 'ld':
+                    // LD计算逻辑
+                    oldFee = 150;
+                    oldFormula = '$150 (固定费用)';
+                    
+                    const ldBaseCost = 70;
+                    const ldPercentageCost = Math.min(price * quantity * 0.01, 2000);
+                    newFee = Math.min(2000, ldBaseCost + ldPercentageCost);
+                    newFormula = `$70 + min(${(price * quantity).toFixed(2)} × 1%, $2,000) = $${ldBaseCost.toFixed(2)} + $${ldPercentageCost.toFixed(2)}`;
+                    break;
+
+                case 'bd':
+                    // BD计算逻辑
+                    oldFee = 300;
+                    oldFormula = '$300 (固定费用)';
+                    
+                    const bdBaseCost = 70 * days;
+                    const bdPercentageCost = Math.min(price * quantity * 0.01, 2000);
+                    newFee = Math.min(2000, bdBaseCost + bdPercentageCost);
+                    newFormula = `$70 × ${days} + min(${(price * quantity).toFixed(2)} × 1%, $2,000) = $${bdBaseCost.toFixed(2)} + $${bdPercentageCost.toFixed(2)}`;
+                    break;
+            }
+
+            const oldUnitFee = oldFee / quantity;
+            const newUnitFee = newFee / quantity;
+            const difference = newFee - oldFee;
+
+            // 更新显示
+            document.getElementById('oldFee').textContent = `$${oldFee.toFixed(2)}`;
+            document.getElementById('oldFormula').textContent = oldFormula;
+            document.getElementById('oldUnitFee').textContent = `$${oldUnitFee.toFixed(2)}`;
+            document.getElementById('newFee').textContent = `$${newFee.toFixed(2)}`;
+            document.getElementById('newFormula').textContent = newFormula;
+            document.getElementById('newUnitFee').textContent = `$${newUnitFee.toFixed(2)}`;
+            
+            // 显示费用比较
+            const comparisonText = `$${Math.abs(difference).toFixed(2)} ${difference > 0 ? 'Additional' : 'Saved'}`;
+            document.getElementById('comparison').textContent = comparisonText;
+
+            // 更新总结
+            const summary = `对于${days}天的${document.getElementById('dealType').options[document.getElementById('dealType').selectedIndex].text}、${quantity}个订单、每单$${price.toFixed(2)}（总销售额$${(price * quantity).toFixed(2)}），新结构费用为$${newFee.toFixed(2)}，旧结构费用为$${oldFee.toFixed(2)}。比旧结构${difference > 0 ? '多花费了' : '节省了'}$${Math.abs(difference).toFixed(2)}。`;
+            document.getElementById('summary').textContent = summary;
+        }
+    </script>
+</body>
+</html> 

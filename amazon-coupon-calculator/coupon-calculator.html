@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>亚马逊 折扣计算器</title>
+    <style>
+        body {
+            font-family: "Segoe UI", "Microsoft Yahei", Arial, sans-serif;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f3f3f3;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #232f3e;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        .header p {
+            color: #666;
+            margin-top: 0;
+        }
+        .calculator-container {
+            display: flex;
+            gap: 25px;
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        .input-section {
+            flex: 1;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #fff;
+            border: 1px solid #eee;
+        }
+        .info-section {
+            flex: 1.2;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        .form-group {
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        .form-group label {
+            width: 150px;
+            margin-right: 15px;
+            font-weight: 600;
+            color: #232f3e;
+        }
+        .form-group input, .form-group select {
+            width: 60%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #FF9900;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255,153,0,0.2);
+        }
+        .input-with-unit {
+            display: flex;
+            align-items: center;
+            width: 60%;
+            position: relative;
+        }
+        .input-with-unit input {
+            flex: 1;
+            width: auto;
+            padding-right: 40px;
+        }
+        .input-with-unit span {
+            position: absolute;
+            right: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+        .discount-type {
+            background-color: #f0f8ff;
+            border-left: 4px solid #1a73e8;
+            padding: 6px 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            font-size: 16px;
+            color: #1a73e8;
+        }
+        button {
+            background-color: #FF9900;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 25px;
+            width: 100%;
+            transition: background-color 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            background-color: #e68a00;
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+        .result-table-container {
+            margin-top: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+        }
+        .result-table-container h3 {
+            color: #232f3e;
+            border-bottom: 2px solid #FF9900;
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .result-table th, .result-table td {
+            border: 1px solid #eee;
+            padding: 10px;
+            text-align: center;
+        }
+        .result-table th {
+            background-color: #f5f5f5;
+            color: #333;
+            font-weight: 600;
+        }
+        .result-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .info-table th, .info-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        .info-table th {
+            background-color: #f5f5f5;
+            color: #333;
+            width: 30%;
+            font-weight: 600;
+        }
+        h2 {
+            color: #232f3e;
+            border-bottom: 2px solid #FF9900;
+            padding-bottom: 10px;
+            font-size: 20px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #232f3e;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        h4 {
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .warning {
+            background-color: #fff3e0;
+            color: #e65100;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 14px;
+            border-left: 4px solid #ff9800;
+        }
+        .warning ul {
+            margin: 10px 0 5px 20px;
+            padding: 0;
+        }
+        .warning li {
+            margin-bottom: 8px;
+        }
+        .discount-explanation {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-left: 4px solid #FF9900;
+        }
+        .discount-explanation p {
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+        strong {
+            color: #e65100;
+        }
+        .price-influence {
+            margin-top: 30px;
+        }
+        .check-mark {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        .x-mark {
+            color: #f44336;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .calculator-container {
+                flex-direction: column;
+            }
+            .input-section, .info-section {
+                width: 100%;
+            }
+        }
+        @media (max-width: 768px) {
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .form-group label {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+            .input-with-unit, .form-group input, .form-group select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>亚马逊折扣计算器</h1>
+        <p>准确计算各种折扣叠加后的最终价格</p>
+    </div>
+    
+    <div class="calculator-container">
+        <div class="input-section">
+            <h2>输入折扣信息</h2>
+            
+            <div class="form-group">
+                <label for="originalPrice">商品原价</label>
+                <div class="input-with-unit">
+                    <input type="number" id="originalPrice" step="0.01" min="0" value="100">
+                    <span>USD</span>
+                </div>
+            </div>
+            
+            <div class="discount-type">活动折扣</div>
+            
+            <div class="form-group">
+                <label for="ld">LD秒杀折扣</label>
+                <div class="input-with-unit">
+                    <input type="number" id="ld" step="1" min="0" max="100" value="0">
+                    <span>%</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="prime">Prime专享折扣</label>
+                <div class="input-with-unit">
+                    <input type="number" id="prime" step="1" min="0" max="100" value="0">
+                    <span>%</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="sevenDayDeal">7DD折扣金额</label>
+                <div class="input-with-unit">
+                    <input type="number" id="sevenDayDeal" step="0.01" min="0" value="0">
+                    <span>USD</span>
+                </div>
+            </div>
+            
+            <div class="discount-type">优惠码与折扣券</div>
+            
+            <div class="form-group">
+                <label for="coupon">Coupon折扣</label>
+                <div class="input-with-unit">
+                    <input type="number" id="coupon" step="1" min="0" max="100" value="0">
+                    <span>%</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="code">Code折扣</label>
+                <div class="input-with-unit">
+                    <input type="number" id="code" step="1" min="0" max="100" value="0">
+                    <span>%</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="memberDiscount">会员专享折扣</label>
+                <div class="input-with-unit">
+                    <input type="number" id="memberDiscount" step="1" min="0" max="100" value="0">
+                    <span>%</span>
+                </div>
+            </div>
+            
+            <button onclick="calculateDiscount()">计算最终价格</button>
+            
+            <div class="result-table-container">
+                <h3>计算结果</h3>
+                <table class="result-table">
+                    <thead>
+                        <tr>
+                            <th>折扣类型</th>
+                            <th>折扣金额</th>
+                            <th>折后价格</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultTableBody">
+                        <!-- 结果将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h2>折扣叠加说明</h2>
+            
+            <table class="info-table">
+                <tr>
+                    <th>折扣类型</th>
+                    <th>计算规则</th>
+                </tr>
+                <tr>
+                    <td>LD秒杀折扣与Coupon</td>
+                    <td>折扣都是基于售价独立计算<br>原价 × (1-LD%) × (1-Coupon%)</td>
+                </tr>
+                <tr>
+                    <td>7DD与Coupon</td>
+                    <td>Coupon基于7DD的价格计算<br>(原价-7DD金额) × (1-Coupon%)</td>
+                </tr>
+                <tr>
+                    <td>Prime专享折扣与其他折扣</td>
+                    <td>其他折扣基于Prime折扣价<b>并列减法</b><br>Prime价格 - Prime价格×Coupon% - Prime价格×Code%</td>
+                </tr>
+                <tr>
+                    <td>Code与Coupon</td>
+                    <td>基于原价独立计算<br>原价 × (1-Code%) × (1-Coupon%)</td>
+                </tr>
+                <tr>
+                    <td>会员专享折扣</td>
+                    <td>在最终价格上计算<br>已折扣价格 × (1-会员折扣%)</td>
+                </tr>
+            </table>
+            
+            <div class="warning">
+                <p><strong>重要提示：</strong></p>
+                <ul>
+                    <li>CODE设置中，无限制型（无需折扣码）会叠加；优先型优惠码取最优</li>
+                    <li>同一时间段的多个COUPON会自动叠加</li>
+                    <li>会员折扣始终在所有折扣后再计算</li>
+                </ul>
+            </div>
+            
+            <div class="discount-explanation price-influence">
+                <h3>各类促销对价格影响</h3>
+                <table class="info-table">
+                    <tr>
+                        <th>促销类型</th>
+                        <th>影响基准价格</th>
+                        <th>影响最低价格</th>
+                    </tr>
+                    <tr>
+                        <td>7 Day Deal</td>
+                        <td class="check-mark">✓</td>
+                        <td class="check-mark">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Lightning Deal</td>
+                        <td class="x-mark">✗</td>
+                        <td class="check-mark">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Deal of The Day</td>
+                        <td class="check-mark">✓</td>
+                        <td class="check-mark">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Prime专享折扣</td>
+                        <td class="check-mark">✓</td>
+                        <td class="check-mark">✓</td>
+                    </tr>
+                    <tr>
+                        <td>Coupon</td>
+                        <td class="x-mark">✗</td>
+                        <td class="x-mark">✗</td>
+                    </tr>
+                    <tr>
+                        <td>积分</td>
+                        <td class="x-mark">✗</td>
+                        <td class="x-mark">✗</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        亚马逊折扣计算器 © 2023 - 帮助卖家准确计算各类折扣叠加后的最终价格
+    </div>
+
+    <script>
+        function calculateDiscount() {
+            const originalPrice = parseFloat(document.getElementById('originalPrice').value) || 0;
+            const ldDiscount = parseFloat(document.getElementById('ld').value) || 0;
+            const primeDiscount = parseFloat(document.getElementById('prime').value) || 0;
+            const couponDiscount = parseFloat(document.getElementById('coupon').value) || 0;
+            const codeDiscount = parseFloat(document.getElementById('code').value) || 0;
+            const sevenDayDeal = parseFloat(document.getElementById('sevenDayDeal').value) || 0;
+            const memberDiscount = parseFloat(document.getElementById('memberDiscount').value) || 0;
+            
+            // 清空结果表格
+            const resultTableBody = document.getElementById('resultTableBody');
+            resultTableBody.innerHTML = '';
+            
+            // 添加原价行
+            addResultRow('原价', 0, originalPrice);
+            
+            let finalPrice = originalPrice;
+            
+            // 根据用户分析的亚马逊折扣叠加规则实现计算逻辑
+            
+            // 首先处理Prime专享折扣，因为其他折扣可能会基于它计算
+            if (primeDiscount > 0) {
+                const primeDiscountAmount = originalPrice * (primeDiscount / 100);
+                const primePrice = originalPrice - primeDiscountAmount;
+                addResultRow('Prime专享折扣', primeDiscountAmount, primePrice);
+                finalPrice = primePrice;
+                
+                // 如果还有其他折扣，它们将基于Prime专享折扣价格计算
+                let totalAdditionalDiscount = 0;
+                
+                // 处理Coupon (基于Prime价格)
+                if (couponDiscount > 0) {
+                    const couponDiscountAmount = primePrice * (couponDiscount / 100);
+                    totalAdditionalDiscount += couponDiscountAmount;
+                    addResultRow('Coupon折扣 (基于Prime价格)', couponDiscountAmount, primePrice - couponDiscountAmount);
+                }
+                
+                // 处理Code (基于Prime价格)
+                if (codeDiscount > 0) {
+                    const codeDiscountAmount = primePrice * (codeDiscount / 100);
+                    totalAdditionalDiscount += codeDiscountAmount;
+                    addResultRow('Code折扣 (基于Prime价格)', codeDiscountAmount, primePrice - codeDiscountAmount);
+                }
+                
+                // 更新最终价格 (所有折扣并列减法，而非折上折)
+                if (totalAdditionalDiscount > 0) {
+                    finalPrice = primePrice - totalAdditionalDiscount;
+                    addResultRow('叠加折扣后价格', totalAdditionalDiscount, finalPrice);
+                }
+                
+                // 会员折扣 (如果有的话)
+                if (memberDiscount > 0) {
+                    const memberDiscountAmount = finalPrice * (memberDiscount / 100);
+                    finalPrice = finalPrice - memberDiscountAmount;
+                    addResultRow('会员专享折扣', memberDiscountAmount, finalPrice);
+                }
+            }
+            // 如果没有Prime专享折扣，则考虑其他折扣情况
+            else {
+                // 处理7DD折扣 (直接减去固定金额)
+                if (sevenDayDeal > 0) {
+                    const sevenDDPrice = originalPrice - sevenDayDeal;
+                    addResultRow('7DD折扣', sevenDayDeal, sevenDDPrice);
+                    finalPrice = sevenDDPrice;
+                    
+                    // 基于7DD价格应用Coupon折扣
+                    if (couponDiscount > 0) {
+                        const couponDiscountAmount = sevenDDPrice * (couponDiscount / 100);
+                        finalPrice = sevenDDPrice - couponDiscountAmount;
+                        addResultRow('Coupon折扣 (基于7DD价格)', couponDiscountAmount, finalPrice);
+                    }
+                    
+                    // 会员折扣
+                    if (memberDiscount > 0) {
+                        const memberDiscountAmount = finalPrice * (memberDiscount / 100);
+                        finalPrice = finalPrice - memberDiscountAmount;
+                        addResultRow('会员专享折扣', memberDiscountAmount, finalPrice);
+                    }
+                }
+                // 处理LD秒杀折扣
+                else if (ldDiscount > 0) {
+                    const ldDiscountAmount = originalPrice * (ldDiscount / 100);
+                    const ldPrice = originalPrice - ldDiscountAmount;
+                    
+                    // Coupon折扣
+                    if (couponDiscount > 0) {
+                        // LD与Coupon都是基于原价独立计算 (A情况)
+                        const couponDiscountAmount = originalPrice * (couponDiscount / 100);
+                        finalPrice = originalPrice * (1 - ldDiscount/100) * (1 - couponDiscount/100);
+                        addResultRow('LD秒杀折扣', ldDiscountAmount, ldPrice);
+                        addResultRow('Coupon折扣 (与LD独立计算)', couponDiscountAmount, finalPrice);
+                    } else {
+                        finalPrice = ldPrice;
+                        addResultRow('LD秒杀折扣', ldDiscountAmount, finalPrice);
+                    }
+                    
+                    // 会员折扣
+                    if (memberDiscount > 0) {
+                        const memberDiscountAmount = finalPrice * (memberDiscount / 100);
+                        finalPrice = finalPrice - memberDiscountAmount;
+                        addResultRow('会员专享折扣', memberDiscountAmount, finalPrice);
+                    }
+                }
+                // 没有Prime/7DD/LD的情况
+                else {
+                    let totalDiscount = 0;
+                    let discountedPrice = originalPrice;
+                    
+                    // Coupon和Code基于原价独立计算 (D情况)
+                    if (couponDiscount > 0 && codeDiscount > 0) {
+                        // 计算独立减去的价格
+                        const couponDiscountAmount = originalPrice * (couponDiscount / 100);
+                        const codeDiscountAmount = originalPrice * (codeDiscount / 100);
+                        
+                        // 计算两者相乘后的最终折扣
+                        finalPrice = originalPrice * (1 - couponDiscount/100) * (1 - codeDiscount/100);
+                        totalDiscount = originalPrice - finalPrice;
+                        
+                        addResultRow('Coupon折扣', couponDiscountAmount, originalPrice - couponDiscountAmount);
+                        addResultRow('Code折扣', codeDiscountAmount, originalPrice - codeDiscountAmount);
+                        addResultRow('叠加折扣后价格', totalDiscount, finalPrice);
+                    }
+                    // 只有Coupon的情况
+                    else if (couponDiscount > 0) {
+                        const couponDiscountAmount = originalPrice * (couponDiscount / 100);
+                        finalPrice = originalPrice - couponDiscountAmount;
+                        addResultRow('Coupon折扣', couponDiscountAmount, finalPrice);
+                    }
+                    // 只有Code的情况
+                    else if (codeDiscount > 0) {
+                        const codeDiscountAmount = originalPrice * (codeDiscount / 100);
+                        finalPrice = originalPrice - codeDiscountAmount;
+                        addResultRow('Code折扣', codeDiscountAmount, finalPrice);
+                    }
+                    
+                    // 会员折扣
+                    if (memberDiscount > 0) {
+                        const memberDiscountAmount = finalPrice * (memberDiscount / 100);
+                        finalPrice = finalPrice - memberDiscountAmount;
+                        addResultRow('会员专享折扣', memberDiscountAmount, finalPrice);
+                    }
+                }
+            }
+            
+            // 添加最终价格行
+            addResultRow('最终成交价', originalPrice - finalPrice, finalPrice, true);
+        }
+        
+        function addResultRow(discountType, discountAmount, price, isFinal = false) {
+            const resultTableBody = document.getElementById('resultTableBody');
+            const row = document.createElement('tr');
+            
+            if (isFinal) {
+                row.style.fontWeight = 'bold';
+                row.style.backgroundColor = '#fff9e6';
+            }
+            
+            row.innerHTML = `
+                <td>${discountType}</td>
+                <td>$${discountAmount.toFixed(2)}</td>
+                <td>$${price.toFixed(2)}</td>
+            `;
+            
+            resultTableBody.appendChild(row);
+        }
+        
+        // 页面加载完成后自动计算一次
+        window.onload = function() {
+            calculateDiscount();
+        };
+    </script>
+</body>
+</html> 
